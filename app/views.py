@@ -171,12 +171,11 @@ def emission_detail(request, imo=None):
 def aggregation(request):
     """Shows the view created in Question1.(c)"""
     order_by = request.GET.get('order_by', '')
-    order_by = order_by if order_by in COLUMNS else 'ship_type'
+    order_by = order_by if order_by in ['ship_type', 'count', 'min', 'avg', 'max'] else 'ship_type'
 
     with connections['default'].cursor() as cursor:
-        cursor.execute('SELECT ship_type, COUNT(imo||ship_name), MIN(technical_efficiency_number),'
-                       'AVG(technical_efficiency_number),MAX(technical_efficiency_number) '
-                       'FROM co2emission_reduced GROUP BY ship_type')
+        cursor.execute(f'''SELECT ship_type, COUNT(imo||ship_name), MIN(technical_efficiency_number), AVG(technical_efficiency_number), MAX(technical_efficiency_number) FROM co2emission_reduced 
+GROUP BY ship_type ORDER BY {order_by}''')
         rows = namedtuplefetchall(cursor)
 
     context = {
