@@ -166,3 +166,22 @@ def emission_detail(request, imo=None):
         'success': success
     }
     return render(request, 'emission_detail.html', context)
+
+
+def aggregation(request):
+    """Shows the view created in Question1.(c)"""
+    order_by = request.GET.get('order_by', '')
+    order_by = order_by if order_by in COLUMNS else 'ship_type'
+
+    with connections['default'].cursor() as cursor:
+        cursor.execute('SELECT ship_type, COUNT(imo||ship_name), MIN(technical_efficiency_number),'
+                       'AVG(technical_efficiency_number),MAX(technical_efficiency_number) '
+                       'FROM co2emission_reduced GROUP BY ship_type')
+        rows = namedtuplefetchall(cursor)
+
+    context = {
+        'nbar': 'aggregation',
+        'rows': rows,
+        'order_by': order_by
+    }
+    return render(request, 'aggregation.html', context)
