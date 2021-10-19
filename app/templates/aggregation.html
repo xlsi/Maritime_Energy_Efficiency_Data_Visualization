@@ -20,7 +20,7 @@
         </tr>
       </thead>
       {% for row in rows %}
-        <tr style="cursor:pointer;" onclick="window.location='/aggregation/ship_type/{{ row.ship_type }}'">
+        <tr style="cursor:pointer;" >
           {% for val in row %}
           <td>{{ val|default:'' }}</td>
           {% endfor %}
