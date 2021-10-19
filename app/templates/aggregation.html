@@ -20,7 +20,7 @@
         </tr>
       </thead>
       {% for row in rows %}
-        <tr style="cursor:pointer;" >
+        <tr style="cursor" >
           {% for val in row %}
           <td>{{ val|default:'' }}</td>
           {% endfor %}
