@@ -7,9 +7,11 @@
 {% block content %}
 <div class="container">
   {% if is_update %}
-    <h1>Emission Details for IMO {{ imo }}</h1>
+  <h1>Emission Details for IMO {{ imo }}</h1>
+    <p>HINT: Date should be in "YYYY-MM-DD" format</p>
   {% else %}
     <h1>Insert New Emission Details</h1>
+    <p>HINT: Date should be in "YYYY-MM-DD" format</p>
   {% endif %}
   {% if msg and success %}
     <span class="text-success h3">{{ msg }}</span>
