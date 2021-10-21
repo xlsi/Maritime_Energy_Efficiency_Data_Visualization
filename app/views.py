@@ -184,3 +184,18 @@ GROUP BY ship_type ORDER BY {order_by}''')
         'order_by': order_by
     }
     return render(request, 'aggregation.html', context)
+
+
+def visual(request):
+    """Shows the visualization"""
+    with connections['default'].cursor() as cursor:
+        cursor.execute('SELECT ship_type, COUNT(imo||ship_name), MIN(technical_efficiency_number),'
+                       'AVG(technical_efficiency_number), MAX(technical_efficiency_number) '
+                       'FROM co2emission_reduced GROUP BY ship_type ORDER BY count')
+        labels = namedtuplefetchall(cursor)
+
+    context = {
+        'nbar': 'visual',
+        'labels': labels
+    }
+    return render(request, 'visual.html', context)
