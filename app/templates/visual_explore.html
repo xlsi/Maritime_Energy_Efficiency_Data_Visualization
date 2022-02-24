@@ -1,0 +1,78 @@
+{% extends "base.html" %}
+{% block title %} Visualization_Explore {% endblock %}
+{% load static %}
+
+{% block content %}
+
+<div class="container" style="padding-bottom: 50px;">
+  <h2>&ensp; TOP 14 PORTS: Num of Ships for Port_Registry</h2>
+  <p>&ensp; &ensp; This is a page that, shows the number of ships for top14 registry_ports.</p>
+  
+  <div id="container" style="width: 75%;">
+    <canvas id="bar-chart"></canvas>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@2.9.3/dist/Chart.min.js"></script>
+  <script>
+    var config = {
+      type: 'bar',
+      data: {
+        datasets: [{
+          data: {{ data|safe }},
+          backgroundColor: [
+                        '#e16c96',
+                        '#f8df72',
+                        '#add5a2',
+                        '#986524',
+                        '#40a070',
+                        '#f8df72',
+                        '#685e48',
+                        '#bbb5ac',
+                        'rgba(255, 99, 132, 0.5)', 
+                        'rgba(54, 162, 235, 0.5)',
+                        'rgba(255, 206, 86, 0.5)',
+                        'rgba(75, 192, 192, 0.5)',
+                        'rgba(153, 102, 255, 0.5)',
+                        'rgba(255, 159, 64, 0.5)'
+                        
+                    ],
+          label: 'Port of Registry'
+        }],
+        labels: {{ labels|safe}}
+      },
+      options: {
+        responsive: true
+      }
+    };
+    window.onload = function() {
+      var ctx = document.getElementById('bar-chart').getContext('2d');
+      window.myPie = new Chart(ctx, config);
+    };
+  </script>
+</div>
+
+<div class="container" style="padding-bottom: 50px;">
+<h3>Dimension Table: Detais for Ships</h3>
+<table class="table table-hover table-striped">
+      <thead>
+        <tr>
+          <th>ship_key</th>
+          <th>imo</th>
+          <th>ship_name</th>
+          <th>ship_type</th>
+          <th>report_period</th>
+          <th>port</th>
+          <th>home_port</th>
+          <th>ice_class</th>
+        </tr>
+      </thead>
+      {% for row in rowsda %}
+        <tr>
+          {% for val in row %}
+          <td>{{ val|default:'' }}</td>
+          {% endfor %}
+        </tr>
+      {% endfor %}
+    </table>
+  </div>
+{% endblock %}

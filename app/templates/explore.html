@@ -1,0 +1,87 @@
+{% extends "base.html" %}
+{% block title %} Explore the data {% endblock %}
+{% load static %}
+
+
+{% block content %}
+<div class="container" style="padding-bottom: 50px;">
+  <h2>CO₂ Emission Report</h2>
+  <p> Fact table for ship technical efficiency and CO₂ emission records.</p>
+  {% if msg %}
+    <span class="text-success h4">{{ msg }}</span>
+  {% endif %}
+  <p>Showing page {{ page }} of {{ num_pages }} pages</p>
+  <button
+    class="btn btn-primary"
+    {% if page == 1 %} disabled {% endif %}
+    onclick="location.href='/explore/{{page|add:"-1"}}?order_by={{ order_by }}';"
+  >
+    ❮ Previous
+  </button>
+  
+  <button
+    class="btn btn-primary"
+    {% if page == num_pages %} disabled {% endif %}
+    onclick="location.href='/explore/{{page|add:"1"}}?order_by={{ order_by }}';"
+  >
+    Next ❯
+  </button>
+  
+  <button
+    class="btn btn-primary"
+    onclick="location.href='/explore/visual_explore';"
+  >
+    Explore ships more 
+  </button>
+  
+  <button
+    class="btn btn-primary"
+    onclick="location.href='/explore/visual_verifier';"
+  >
+    Explore verifier more 
+  </button>
+  
+  <div class="table-responsive">
+    <table class="table table-hover table-striped">
+      <thead>
+        <!-- 定义表头类型、label -->
+        <tr>
+          <th class="ordering" onclick="window.location='/explore/?order_by=ship_key'">Ship Key</th>
+          <th class="ordering" onclick="window.location='/explore/?order_by=verifier_key'">Verifier Key</th>
+          <th class="ordering" onclick="window.location='/explore/?order_by=issue_date_key'">Issue Date Key</th>
+          <th class="ordering" onclick="window.location='/explore/?order_by=expire_date_key'">Expire Date Key</th>
+          <th class="ordering" onclick="window.location='/explore/?order_by=eiv'">EIV (gCO₂/t·nm)</th>
+          <th class="ordering" onclick="window.location='/explore/?order_by=eedi'">EEDI (gCO₂/t·nm)</th>
+          <!-- <th class="ordering" onclick="window.location='/explore/?order_by=report_period'">Report Period</th> -->
+          <th class="ordering" onclick="window.location='/explore/?order_by=total_fuel_consumption'">Total fuel consumption</th>
+          <th class="ordering" onclick="window.location='/explore/?order_by=total_co2_emission'">Total CO₂ emissions</th>
+          
+          <th class="ordering" onclick="window.location='/explore/?order_by=time_at_sea'">Annual Time spent at sea [hours]</th>
+          <th class="ordering" onclick="window.location='/explore/?order_by=annual_co2_per_distance'">CO₂ emissions per distance</th>
+          <th class="ordering" onclick="window.location='/explore/?order_by=annual_co2_per_trans_work'">CO₂ emissions per transport work</th>
+          <th class="ordering" onclick="window.location='/explore/?order_by=time_at_sea'">Total Time spent at sea [hours]</th>
+      
+      </thead>
+      {% for row in rows %}
+      <!-- 修改row.imo -->
+        <tr>
+          {% for val in row %}
+            {% if val == row.ship_key %}
+            <td  style="cursor:pointer;" onclick = "location.href = '/explore/ship_key/{{ row.ship_key }}';"><font color = '#1976D2'>{{ val|default:'' }}</font></td>
+            {% elif val == row.verifier_key %}
+            <td  style="cursor:pointer;" onclick = "location.href = '/explore/verifier_key/{{ row.verifier_key }}';"><font color = '#1976D2'>{{ val|default:'' }}</font></td>
+             {% elif val == row.issue_date_key %}
+            <td  style="cursor:pointer;" onclick = "location.href = '/explore/issue_date_key/{{ row.issue_date_key }}';"><font color = '#1976D2'>{{ val|default:'' }}</font></td>
+             {% elif val == row.expire_date_key %}
+            <td  style="cursor:pointer;" onclick = "location.href = '/explore/expire_date_key/{{ row.expire_date_key }}';"><font color = '#1976D2'>{{ val|default:'' }}</font></td>
+            {% else %}
+            <td>{{ val|default:'' }}</td>
+            {% endif %}
+          {% endfor %}
+        </tr>
+      {% endfor %}
+    </table>
+  </div>
+</div>
+{% endblock %}
+<!-- " onclick="window.location='/explore/ship_name/{{ row.ship_name }}'" -->
