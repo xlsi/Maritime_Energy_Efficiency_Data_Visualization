@@ -17,10 +17,10 @@ PAGE_SIZE = 20
 COLUMNS = [
     'imo',
     'ship_name',
+    'technical_efficiency_number',
     'ship_type',
-    'issue_date',
-    'expiry_date',
-    'eedi'
+    'doc_issue_date',
+    'doc_expiry_date'
 ]
 
 
@@ -39,71 +39,6 @@ def db(request):
 
     context = {'greetings': greetings, 'nbar': 'db'}
     return render(request, 'db.html', context)
-
-# Add new block -- Aggregation
-def aggregation(request):
-    with connections['default'].cursor() as cursor:
-        cursor.execute('SELECT ship_type, min(eedi) as min_eedi, avg(eedi::float)::numeric(10,2) as avg_eedi, max(eedi) as max_eedi FROM co2emission_reduced GROUP BY ship_type ORDER BY ship_type;')
-        rows = namedtuplefetchall(cursor)
-
-    context = {'rows': rows, 'nbar': 'aggregation'}
-    return render(request, 'project.html', context)
-
-# Add new block -- Visual
-# Need customize
-
-def visual(request):
-    with connections['default'].cursor() as cursor:
-        cursor.execute('SELECT ship_type, count(*), avg(eedi::float)::numeric(10,2) FROM co2emission_reduced GROUP BY ship_type ORDER BY ship_type;')
-        rows = cursor.fetchall()
-    labels = []
-    data = []
-    avgeedi = []
-    for i in rows:
-        labels.append(i[0])
-        data.append(i[1])
-
-    context = {'labels': labels, 'data': data, 'nbar': 'visual'}
-    return render(request, 'visual.html', context)  
-
-# Add new block -- Exxplore the data
-
-COLUMNS_explore = [
-            'ship_key', 'verifier_key', 'issue_date_key', 
-            'expire_date_key', 'eiv', 'eedi', 'total_fuel_consumption', 
-            'total_co2_emission', 'annual_time_at_sea', 
-            'annual_co2_per_distance', 'annual_co2_per_trans_work', 'time_at_sea'
-]
-def explore(request, page = 1):
-    """Shows the explore table page"""
-    msg = None
-    order_by = request.GET.get('order_by', '')
-    order_by = order_by if order_by in COLUMNS_explore else 'ship_key'
-    with connections['default'].cursor() as cursor:
-        cursor.execute('SELECT COUNT(*) FROM fact_table')
-        count = cursor.fetchone()[0]
-        num_pages = (count - 1) // PAGE_SIZE + 1
-        page = clamp(page, 1, num_pages)
- 
-        offset = (page - 1) * PAGE_SIZE
-        cursor.execute(f'''
-            SELECT *
-            FROM fact_table
-            ORDER BY {order_by}
-            OFFSET %s
-            LIMIT %s;
-        ''', [offset, PAGE_SIZE])
-        rows = namedtuplefetchall(cursor)
-
-    context = {
-        'nbar': 'explore',
-        'page': page,
-        'rows': rows,
-        'num_pages': num_pages,
-        'msg': msg,
-        'order_by': order_by
-    }
-    return render(request, 'explore.html', context)
 
 def emissions(request, page=1):
     """Shows the emissions table page"""
@@ -218,7 +153,7 @@ def emission_detail(request, imo=None):
 
     # Set dates (if present) to iso format, necessary for form
     # We don't use this in class, but you will need it for your project
-    for field in ['issue_date', 'expiry_date']:
+    for field in ['doc_issue_date', 'doc_expiry_date']:
         if initial_values.get(field, None) is not None:
             initial_values[field] = initial_values[field].isoformat()
 
@@ -237,7 +172,82 @@ def emission_detail(request, imo=None):
     }
     return render(request, 'emission_detail.html', context)
 
-# 该函数已作废
+
+def aggregation(request):
+    """Shows the query results"""
+    order_by = request.GET.get('order_by', '')
+    order_by = order_by if order_by in ['ship_type', 'count', 'min', 'avg', 'max'] else 'ship_type'
+
+    with connections['default'].cursor() as cursor:
+        cursor.execute(f'''SELECT ship_type, COUNT(imo||ship_name), MIN(technical_efficiency_number),
+AVG(technical_efficiency_number), MAX(technical_efficiency_number) FROM co2emission_reduced 
+GROUP BY ship_type ORDER BY {order_by}''')
+        rows = namedtuplefetchall(cursor)
+
+    context = {
+        'nbar': 'aggregation',
+        'rows': rows,
+        'order_by': order_by
+    }
+    return render(request, 'aggregation.html', context)
+
+
+def visual(request):
+    """Shows the visualization"""
+    with connections['default'].cursor() as cursor:
+        cursor.execute('SELECT ship_type, COUNT(imo||ship_name), MIN(technical_efficiency_number),'
+                       'AVG(technical_efficiency_number), MAX(technical_efficiency_number) '
+                       'FROM co2emission_reduced GROUP BY ship_type ORDER BY count')
+        labels = namedtuplefetchall(cursor)
+
+    context = {
+        'nbar': 'visual',
+        'labels': labels
+    }
+    return render(request, 'visual.html', context)
+
+
+# Add new block -- Exxplore the data
+
+COLUMNS_explore = [
+            'ship_key', 'verifier_key', 'issue_date_key', 
+            'expire_date_key', 'eiv', 'eedi', 'total_fuel_consumption', 
+            'total_co2_emission', 'annual_time_at_sea', 
+            'annual_co2_per_distance', 'annual_co2_per_trans_work', 'time_at_sea'
+]
+
+def explore(request, page = 1):
+    """Shows the explore table page"""
+    msg = None
+    order_by = request.GET.get('order_by', '')
+    order_by = order_by if order_by in COLUMNS_explore else 'ship_key'
+    with connections['default'].cursor() as cursor:
+        cursor.execute('SELECT COUNT(*) FROM fact_table')
+        count = cursor.fetchone()[0]
+        num_pages = (count - 1) // PAGE_SIZE + 1
+        page = clamp(page, 1, num_pages)
+ 
+        offset = (page - 1) * PAGE_SIZE
+        cursor.execute(f'''
+            SELECT *
+            FROM fact_table
+            ORDER BY {order_by}
+            OFFSET %s
+            LIMIT %s;
+        ''', [offset, PAGE_SIZE])
+        rows = namedtuplefetchall(cursor)
+
+    context = {
+        'nbar': 'explore',
+        'page': page,
+        'rows': rows,
+        'num_pages': num_pages,
+        'msg': msg,
+        'order_by': order_by
+    }
+    return render(request, 'explore.html', context)
+
+
 def explore_detail(request, imo=None):
     success, form, msg, initial_values = False, None, None, {}
     is_update = imo is not None
@@ -283,7 +293,7 @@ def explore_detail(request, imo=None):
     }
     return render(request, 'explore_detail.html', context)
 
-# 后将该函数替换为任意dimensional key
+
 def explore_ship_key(request, ship_key=None):
     success, form, msg, initial_values = False, None, None, {}
     is_update = ship_key is not None
@@ -402,7 +412,6 @@ def explore_expire_date_key(request, expire_date_key=None):
         'success': success
     }
     return render(request, 'explore_expire_date_key.html', context)
-
 
 
 def verifier(request):
