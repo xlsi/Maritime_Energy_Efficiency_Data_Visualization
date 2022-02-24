@@ -53,18 +53,19 @@ def aggregation(request):
 # Need customize
 
 def visual(request):
-    """Shows the visualization"""
     with connections['default'].cursor() as cursor:
-        cursor.execute('SELECT ship_type, COUNT(imo||ship_name), MIN(eedi),'
-                       'AVG(eedi), MAX(eedi) '
-                       'FROM co2emission_reduced GROUP BY ship_type ORDER BY count')
-        labels = namedtuplefetchall(cursor)
+        cursor.execute('SELECT ship_type, count(*), avg(eedi::float)::numeric(10,2) FROM co2emission_reduced GROUP BY ship_type ORDER BY ship_type;')
+        rows = cursor.fetchall()
+    labels = []
+    data = []
+    avgeedi = []
+    for i in rows:
+        labels.append(i[0])
+        data.append(i[1])
 
-    context = {
-        'nbar': 'visual',
-        'labels': labels
-    }
-    return render(request, 'visual.html', context)
+    context = {'labels': labels, 'data': data, 'nbar': 'visual'}
+    return render(request, 'visual.html', context)  
+
 # Add new block -- Exxplore the data
 
 COLUMNS_explore = [
