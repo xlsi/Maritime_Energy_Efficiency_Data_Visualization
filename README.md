@@ -1,4 +1,4 @@
-# Maritime Energy Efficiency Database
+# Maritime Energy Efficiency Data Visualization
 Data Management and Warehouse Project - create an interactive interface to present data in different dimensions and to visualize them to do exploratory analysis.
 
 ## Techniques 
