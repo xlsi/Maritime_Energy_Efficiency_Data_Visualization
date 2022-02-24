@@ -40,6 +40,7 @@ def db(request):
     context = {'greetings': greetings, 'nbar': 'db'}
     return render(request, 'db.html', context)
 
+
 def emissions(request, page=1):
     """Shows the emissions table page"""
     msg = None
