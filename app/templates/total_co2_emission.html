@@ -1,0 +1,192 @@
+{% extends "base.html" %}
+{% block title %} Total CO2 Emission {% endblock %}
+{% load static %}
+
+{% block content %}
+<div class="container" style="padding-bottom: 50px;">
+    <h2>Total CO2 Emission</h2>
+    <p>Calculate the sum of total CO2 emission in different verifier countries, of different ship types and so on.</p>
+    <li>Figure of the Sum of Total CO2 Emission in Different Verifier Countries</li>
+    <li>Figure of the Sum of Total CO2 Emission of Different Ship Types</li>
+    <li>Figure of the Sum of Total CO2 Emission of Different Ship Types in Different Verifier Countries</li>
+    <li>Table of the Sum of Total CO2 Emission (with Cube Function)</li>
+    <li>Table of the Sum of Total CO2 Emission (with Rollup Function)</li>
+
+    <h3>The Sum of Total CO2 Emission in Different Verifier Countries</h3>
+    <div class="container">
+        <canvas id="BarChart1" width="300" height="80"></canvas>
+    </div>
+    <!--Chart js-->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.8.0/Chart.min.js"></script>
+    <script>
+        var ctx = document.getElementById('BarChart1').getContext('2d');
+        var BarChart1 = new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels: [{%for label in fig_row1%}'{{label.verifier_country}}',{%endfor%}],
+                datasets: [{
+                  label: 'Different Verifier Countries',
+                  data: [{%for label in fig_row1%}'{{label.sum_co2_emission}}',{%endfor%}],
+                  backgroundColor: [
+                    'rgba(75,0,130,0.6)',
+                    'rgba(25,25,112,0.6)',
+                    'rgba(0,0,255,0.6)',
+                    'rgba(0,139,139,0.6)',
+                    'rgba(0,206,209,0.6)',
+                    'rgba(175,238,238,0.6)',
+                    'rgba(0,255,0,0.6)',
+                    'rgba(173,255,47,0.6)',
+                    'rgba(255,215,0,0.6)',
+                    'rgba(255,165,0,0.6)',
+                    'rgba(244,164,96,0.6)',
+                    'rgba(255,69,0,0.6)',
+                    'rgba(205,92,92,0.6)',
+                    'rgba(178,34,34,0.6)',
+                    'rgba(139,69,19,0.6)'
+                  ]
+                }]
+            }
+        });
+    </script>
+
+    <h3>The Sum of Total CO2 Emission of Different Ship Types</h3>
+    <div class="container">
+        <canvas id="BarChart2" width="300" height="120"></canvas>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.8.0/Chart.min.js"></script>
+    <script>
+        var ctx = document.getElementById('BarChart2').getContext('2d');
+        var BarChart2 = new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels: [{%for label in fig_row2%}'{{label.ship_type}}',{%endfor%}],
+                datasets: [{
+                  label: 'Different Ship Types',
+                  data: [{%for label in fig_row2%}'{{label.sum_co2_emission}}',{%endfor%}],
+                  backgroundColor: [
+                    'rgba(75,0,130,0.6)',
+                    'rgba(25,25,112,0.6)',
+                    'rgba(0,0,255,0.6)',
+                    'rgba(0,139,139,0.6)',
+                    'rgba(0,206,209,0.6)',
+                    'rgba(175,238,238,0.6)',
+                    'rgba(0,255,0,0.6)',
+                    'rgba(173,255,47,0.6)',
+                    'rgba(255,215,0,0.6)',
+                    'rgba(255,165,0,0.6)',
+                    'rgba(244,164,96,0.6)',
+                    'rgba(255,69,0,0.6)',
+                    'rgba(205,92,92,0.6)',
+                    'rgba(178,34,34,0.6)',
+                    'rgba(139,69,19,0.6)'
+                  ]
+                }]
+            }
+        });
+    </script>
+
+  <h3>The Sum of Total CO2 Emission of Different Ship Types in Different Verifier Countries</h3>
+    <div class="container">
+        <canvas id="BarChart3" width="300" height="120"></canvas>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.8.0/Chart.min.js"></script>
+    <script>
+        var ctx = document.getElementById('BarChart3').getContext('2d');
+        var BarChart3 = new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels: [{%for label in fig_row3%}'{{label.verifier_country}}+{{label.ship_type}}',{%endfor%}],
+                datasets: [{
+                  label: 'Different Ship Types in Different Countries',
+                  data: [{%for label in fig_row3%}'{{label.sum_co2_emission}}',{%endfor%}],
+                  backgroundColor: [
+                    'rgba(75,0,130,0.6)',
+                    'rgba(25,25,112,0.6)',
+                    'rgba(0,0,255,0.6)',
+                    'rgba(0,139,139,0.6)',
+                    'rgba(0,206,209,0.6)',
+                    'rgba(175,238,238,0.6)',
+                    'rgba(0,255,0,0.6)',
+                    'rgba(173,255,47,0.6)',
+                    'rgba(255,215,0,0.6)',
+                    'rgba(255,165,0,0.6)',
+                    'rgba(244,164,96,0.6)',
+                    'rgba(255,69,0,0.6)',
+                    'rgba(205,92,92,0.6)',
+                    'rgba(178,34,34,0.6)',
+                    'rgba(139,69,19,0.6)',
+                    'rgba(75,0,130,0.6)',
+                    'rgba(25,25,112,0.6)',
+                    'rgba(0,0,255,0.6)',
+                    'rgba(0,139,139,0.6)',
+                    'rgba(0,206,209,0.6)',
+                    'rgba(175,238,238,0.6)',
+                    'rgba(0,255,0,0.6)',
+                    'rgba(173,255,47,0.6)',
+                    'rgba(255,215,0,0.6)',
+                    'rgba(255,165,0,0.6)',
+                    'rgba(244,164,96,0.6)',
+                    'rgba(255,69,0,0.6)',
+                    'rgba(205,92,92,0.6)',
+                    'rgba(178,34,34,0.6)',
+                    'rgba(139,69,19,0.6)',
+                    'rgba(75,0,130,0.6)',
+                    'rgba(25,25,112,0.6)',
+                    'rgba(0,0,255,0.6)',
+                    'rgba(0,139,139,0.6)',
+                    'rgba(0,206,209,0.6)',
+                    'rgba(175,238,238,0.6)',
+                    'rgba(0,255,0,0.6)',
+                    'rgba(173,255,47,0.6)',
+                    'rgba(255,215,0,0.6)',
+                    'rgba(255,165,0,0.6)',
+                    'rgba(244,164,96,0.6)',
+                    'rgba(255,69,0,0.6)',
+                    'rgba(205,92,92,0.6)',
+                    'rgba(178,34,34,0.6)',
+                    'rgba(139,69,19,0.6)'
+                  ]
+                }]
+            }
+        });
+    </script>
+  <div class="table-responsive">
+    <h3>Total CO2 Emission (with cube function)</h3>
+    <table class="table table-hover table-striped">
+      <thead>
+        <tr>
+          <th class="ordering" onclick="window.location='/total_co2_emission/?order_by=verifier_country'">Verifier Country</th>
+          <th class="ordering" onclick="window.location='/total_co2_emission/?order_by=ship_type'">Ship Type</th>
+          <th class="ordering" onclick="window.location='/total_co2_emission/?order_by=sum_co2_emission'">Sum of CO2 Emission</th>
+        </tr>
+      </thead>
+      {% for row in rows1 %}
+        <tr>
+          {% for val in row %}
+          <td>{{ val|default:'' }}</td>
+          {% endfor %}
+        </tr>
+      {% endfor %}
+    </table>
+    <h3>Total CO2 Emission (with rollup function)</h3>
+    <table class="table table-hover table-striped">
+      <thead>
+        <tr>
+          <th class="ordering" onclick="window.location='/total_co2_emission/?order_by=verifier_country'">Verifier Country</th>
+          <th class="ordering" onclick="window.location='/total_co2_emission/?order_by=ship_type'">Ship Type</th>
+          <th class="ordering" onclick="window.location='/total_co2_emission/?order_by=sum_co2_emission'">Sum of CO2 Emission</th>
+        </tr>
+      </thead>
+      {% for row in rows2 %}
+        <tr>
+          {% for val in row %}
+          <td>{{ val|default:'' }}</td>
+          {% endfor %}
+        </tr>
+      {% endfor %}
+    </table>
+  </div>
+</div>
+{% endblock %}
