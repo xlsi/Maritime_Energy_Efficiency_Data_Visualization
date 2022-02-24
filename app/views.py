@@ -17,10 +17,10 @@ PAGE_SIZE = 20
 COLUMNS = [
     'imo',
     'ship_name',
-    'technical_efficiency_number',
     'ship_type',
-    'doc_issue_date',
-    'doc_expiry_date'
+    'issue_date',
+    'expiry_date',
+    'eedi'
 ]
 
 
@@ -40,6 +40,69 @@ def db(request):
     context = {'greetings': greetings, 'nbar': 'db'}
     return render(request, 'db.html', context)
 
+# Add new block -- Aggregation
+def aggregation(request):
+    with connections['default'].cursor() as cursor:
+        cursor.execute('SELECT ship_type, min(eedi) as min_eedi, avg(eedi::float)::numeric(10,2) as avg_eedi, max(eedi) as max_eedi FROM co2emission_reduced GROUP BY ship_type ORDER BY ship_type;')
+        rows = namedtuplefetchall(cursor)
+
+    context = {'rows': rows, 'nbar': 'aggregation'}
+    return render(request, 'project.html', context)
+
+# Add new block -- Visual
+# Need customize
+
+def visual(request):
+    """Shows the visualization"""
+    with connections['default'].cursor() as cursor:
+        cursor.execute('SELECT ship_type, COUNT(imo||ship_name), MIN(eedi),'
+                       'AVG(eedi), MAX(eedi) '
+                       'FROM co2emission_reduced GROUP BY ship_type ORDER BY count')
+        labels = namedtuplefetchall(cursor)
+
+    context = {
+        'nbar': 'visual',
+        'labels': labels
+    }
+    return render(request, 'visual.html', context)
+# Add new block -- Exxplore the data
+
+COLUMNS_explore = [
+            'ship_key', 'verifier_key', 'issue_date_key', 
+            'expire_date_key', 'eiv', 'eedi', 'total_fuel_consumption', 
+            'total_co2_emission', 'annual_time_at_sea', 
+            'annual_co2_per_distance', 'annual_co2_per_trans_work', 'time_at_sea'
+]
+def explore(request, page = 1):
+    """Shows the explore table page"""
+    msg = None
+    order_by = request.GET.get('order_by', '')
+    order_by = order_by if order_by in COLUMNS_explore else 'ship_key'
+    with connections['default'].cursor() as cursor:
+        cursor.execute('SELECT COUNT(*) FROM fact_table')
+        count = cursor.fetchone()[0]
+        num_pages = (count - 1) // PAGE_SIZE + 1
+        page = clamp(page, 1, num_pages)
+ 
+        offset = (page - 1) * PAGE_SIZE
+        cursor.execute(f'''
+            SELECT *
+            FROM fact_table
+            ORDER BY {order_by}
+            OFFSET %s
+            LIMIT %s;
+        ''', [offset, PAGE_SIZE])
+        rows = namedtuplefetchall(cursor)
+
+    context = {
+        'nbar': 'explore',
+        'page': page,
+        'rows': rows,
+        'num_pages': num_pages,
+        'msg': msg,
+        'order_by': order_by
+    }
+    return render(request, 'explore.html', context)
 
 def emissions(request, page=1):
     """Shows the emissions table page"""
@@ -154,7 +217,7 @@ def emission_detail(request, imo=None):
 
     # Set dates (if present) to iso format, necessary for form
     # We don't use this in class, but you will need it for your project
-    for field in ['doc_issue_date', 'doc_expiry_date']:
+    for field in ['issue_date', 'expiry_date']:
         if initial_values.get(field, None) is not None:
             initial_values[field] = initial_values[field].isoformat()
 
@@ -172,158 +235,6 @@ def emission_detail(request, imo=None):
         'success': success
     }
     return render(request, 'emission_detail.html', context)
-
-def aggregation(request):
-    """Shows the query results"""
-    order_by = request.GET.get('order_by', '')
-    order_by = order_by if order_by in ['ship_type', 'count', 'min', 'avg', 'max'] else 'ship_type'
-
-    with connections['default'].cursor() as cursor:
-        cursor.execute(f'''SELECT ship_type, COUNT(imo||ship_name), MIN(technical_efficiency_number),
-AVG(technical_efficiency_number), MAX(technical_efficiency_number) FROM co2emission_reduced 
-GROUP BY ship_type ORDER BY {order_by}''')
-        rows = namedtuplefetchall(cursor)
-
-    context = {
-        'nbar': 'aggregation',
-        'rows': rows,
-        'order_by': order_by
-    }
-    return render(request, 'aggregation.html', context)
-
-
-def visual(request):
-    """Shows the visualization"""
-    with connections['default'].cursor() as cursor:
-        cursor.execute('SELECT ship_type, COUNT(imo||ship_name), MIN(technical_efficiency_number),'
-                       'AVG(technical_efficiency_number), MAX(technical_efficiency_number) '
-                       'FROM co2emission_reduced GROUP BY ship_type ORDER BY count')
-        labels = namedtuplefetchall(cursor)
-
-    context = {
-        'nbar': 'visual',
-        'labels': labels
-    }
-    return render(request, 'visual.html', context)
-
-
-# Add new block -- Exxplore the data
-
-COLUMNS_explore = [
-            'ship_key', 'verifier_key', 'issue_date_key', 
-            'expire_date_key', 'eiv', 'eedi', 'total_fuel_consumption', 
-            'total_co2_emission', 'annual_time_at_sea', 
-            'annual_co2_per_distance', 'annual_co2_per_trans_work', 'time_at_sea'
-]
-
-def explore(request, page = 1):
-    """Shows the explore table page"""
-    msg = None
-    order_by = request.GET.get('order_by', '')
-    order_by = order_by if order_by in COLUMNS_explore else 'ship_key'
-    with connections['default'].cursor() as cursor:
-        cursor.execute('SELECT COUNT(*) FROM fact_table')
-        count = cursor.fetchone()[0]
-        num_pages = (count - 1) // PAGE_SIZE + 1
-        page = clamp(page, 1, num_pages)
- 
-        offset = (page - 1) * PAGE_SIZE
-        cursor.execute(f'''
-            SELECT *
-            FROM fact_table
-            ORDER BY {order_by}
-            OFFSET %s
-            LIMIT %s;
-        ''', [offset, PAGE_SIZE])
-        rows = namedtuplefetchall(cursor)
-
-    context = {
-        'nbar': 'explore',
-        'page': page,
-        'rows': rows,
-        'num_pages': num_pages,
-        'msg': msg,
-        'order_by': order_by
-    }
-    return render(request, 'explore.html', context)
-
-
-def explore_detail(request, imo=None):
-    success, form, msg, initial_values = False, None, None, {}
-    is_update = imo is not None
-    if request.method == 'POST':
-        # Since we set imo=disabled for updating, the value is not in the POST
-        # data so we need to set it manually. Otherwise if we are doing an
-        # insert, it will be None but filled out in the form
-        if imo:
-            request.POST._mutable = True
-            request.POST['imo'] = imo
-        else:
-            imo = request.POST['imo']
-
-        form = ShipForm(request.POST)
-        action = request.POST.get('action', None)
-
-    elif imo:  # GET request and imo is set
-        with connections['default'].cursor() as cursor:
-            cursor.execute('SELECT * FROM explore_2020 WHERE imo = %s', [imo])
-            try:
-                initial_values = namedtuplefetchall(cursor)[0]._asdict()
-            except IndexError:
-                raise Http404(f'IMO {imo} not found')
-
-    # Set dates (if present) to iso format, necessary for form
-    # We don't use this in class, but you will need it for your project
-    for field in ['issue_date', 'expiry_date']:
-        if initial_values.get(field, None) is not None:
-            initial_values[field] = initial_values[field].isoformat()
-
-    # Initialize form if not done already
-    form = form or ShipForm(initial=initial_values)
-    if is_update:
-        form['imo'].disabled = True
-
-    context = {
-        'nbar': 'explore',
-        'is_update': is_update,
-        'imo': imo,
-        'form': form,
-        'msg': msg,
-        'success': success
-    }
-    return render(request, 'explore_detail.html', context)
-
-
-def explore_ship_key(request, ship_key=None):
-    success, form, msg, initial_values = False, None, None, {}
-    is_update = ship_key is not None
-    with connections['default'].cursor() as cursor:
-        cursor.execute('SELECT * FROM explore WHERE ship_key = %s', [ship_key])
-        try:
-            initial_values = namedtuplefetchall(cursor)[0]._asdict()
-        except IndexError:
-            raise Http404(f'ship_key {ship_key} not found')
-
-    # Set dates (if present) to iso format, necessary for form
-    # We don't use this in class, but you will need it for your project
-    for field in ['issue_date', 'expiry_date']:
-        if initial_values.get(field, None) is not None:
-            initial_values[field] = initial_values[field].isoformat()
-
-    # Initialize form if not done already
-    form = form or ShipForm(initial=initial_values)
-    if is_update:
-        form['ship_key'].disabled = True
-
-    context = {
-        'nbar': 'explore',
-        'is_update': is_update,
-        'ship_key': ship_key,
-        'form': form,
-        'msg': msg,
-        'success': success
-    }
-    return render(request, 'explore_ship_key.html', context)
 
 def explore_verifier_key(request, verifier_key=None):
     success, form, msg, initial_values = False, None, None, {}
@@ -412,6 +323,7 @@ def explore_expire_date_key(request, expire_date_key=None):
         'success': success
     }
     return render(request, 'explore_expire_date_key.html', context)
+
 
 
 def verifier(request):
