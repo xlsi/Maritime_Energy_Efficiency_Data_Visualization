@@ -7,9 +7,9 @@ DAY_IN_SEC = 24 * 60 * 60
 
 def get_choices(col: str):
     # Try to get choices from cache
-    col_choices_key = f'{col}-CHOICES'
-    if col_choices_key in cache:
-        return cache[col_choices_key]
+#     col_choices_key = f'{col}-CHOICES'
+#     if col_choices_key in cache:
+#         return cache[col_choices_key]
 
     # If choices are not in cache, query db, set cache and then return
     with connections['default'].cursor() as cursor:
