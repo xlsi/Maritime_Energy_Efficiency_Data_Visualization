@@ -153,7 +153,7 @@ def emission_detail(request, imo=None):
 
     # Set dates (if present) to iso format, necessary for form
     # We don't use this in class, but you will need it for your project
-    for field in ['doc_issue_date', 'doc_expiry_date']:
+    for field in ['issue_date', 'expiry_date']:
         if initial_values.get(field, None) is not None:
             initial_values[field] = initial_values[field].isoformat()
 
@@ -171,7 +171,6 @@ def emission_detail(request, imo=None):
         'success': success
     }
     return render(request, 'emission_detail.html', context)
-
 
 def aggregation(request):
     """Shows the query results"""
