@@ -1,0 +1,32 @@
+{% extends "base.html" %}
+{% block title %} Aggregation {% endblock %}
+{% load static %}
+
+{% block content %}
+<div class="container" style="padding-bottom: 50px;">
+  <h2>Aggregation</h2>
+  <p> For each ship type, find the number of diffierent ships of that type as well as the minimum, average, and maximum EEDI values for ships of that type.</p>
+  <br/>
+  <br/>
+  <div class="table-responsive">
+    <table class="table table-hover table-striped">
+      <thead>
+        <tr>
+          <th class="ordering" onclick="window.location='/aggregation/?order_by=ship_type'">Ship Type</th>
+          <th class="ordering" onclick="window.location='/aggregation/?order_by=count'">the Number of Different Ships</th>
+          <th class="ordering" onclick="window.location='/aggregation/?order_by=min'">Minimum EEDI</th>
+          <th class="ordering" onclick="window.location='/aggregation/?order_by=avg'">Average EEDI</th>
+          <th class="ordering" onclick="window.location='/aggregation/?order_by=max'">Maximum EEDI</th>
+        </tr>
+      </thead>
+      {% for row in rows %}
+        <tr>
+          {% for val in row %}
+          <td>{{ val|default:'' }}</td>
+          {% endfor %}
+        </tr>
+      {% endfor %}
+    </table>
+  </div>
+</div>
+{% endblock %}

@@ -1,0 +1,63 @@
+{% extends "base.html" %}
+{% block title %} Explore the data {% endblock %}
+{% load static %}
+
+
+{% block content %}
+<div class="container" style="padding-bottom: 50px;">
+  <h2>CO₂ Emision Report</h2>
+  <p> Energy Efficiency Design Index (EEDI) aggregated by ship type :)</p>
+  {% if msg %}
+    <span class="text-success h4">{{ msg }}</span>
+  {% endif %}
+  <p>Showing page {{ page }} of {{ num_pages }} pages</p>
+  <button
+    class="btn btn-primary"
+    {% if page == 1 %} disabled {% endif %}
+    onclick="location.href='/explore/{{page|add:"-1"}}?order_by={{ order_by }}';"
+  >
+    ❮ Previous
+  </button>
+  <button
+    class="btn btn-primary"
+    {% if page == num_pages %} disabled {% endif %}
+    onclick="location.href='/explore/{{page|add:"1"}}?order_by={{ order_by }}';"
+  >
+    Next ❯
+  </button>
+  <div class="table-responsive">
+    <table class="table table-hover table-striped">
+      <thead>
+        <!-- 定义表头类型、label -->
+        <tr>
+          <th class="ordering" onclick="window.location='/explore /?order_by=imo'">IMO</th>
+          <th class="ordering" onclick="window.location='/explore/?order_by=ship_name'">Ship Name</th>
+          <th class="ordering" onclick="window.location='/explore/?order_by=ship_type'">Ship Type</th>
+          <th class="ordering" onclick="window.location='/explore/?order_by=eiv'">EIV (gCO₂/t·nm)</th>
+          <th class="ordering" onclick="window.location='/explore/?order_by=eedi'">EEDI (gCO₂/t·nm)</th>
+          <th class="ordering" onclick="window.location='/explore/?order_by=verifier_num'">Verifier Number</th>
+          <th class="ordering" onclick="window.location='/explore/?order_by=report_period'">Report Period</th>
+          <th class="ordering" onclick="window.location='/explore/?order_by=total_co2_emission'">Total CO₂ emissions</th>
+          <th class="ordering" onclick="window.location='/explore/?order_by=total_fuel_consumption'">Total fuel consumption</th>
+          <th class="ordering" onclick="window.location='/explore/?order_by=time_at_sea'">Time spent at sea [hours]</th>
+          <th class="ordering" onclick="window.location='/explore/?order_by=annual_co2_per_distance'">CO₂ emissions per distance</th>
+          <th class="ordering" onclick="window.location='/explore/?order_by=annual_co2_per_trans_work'">CO₂ emissions per transport work</th>
+      
+      </thead>
+      {% for row in rows %}
+      <!-- 修改row.imo -->
+        <tr>
+          {% for val in row %}
+            {% if val == row.ship_name %}
+            <td  style="cursor:pointer;" onclick = "location.href = '/explore/ship_name/{{ row.ship_name }}';"><font color = '#1976D2'>{{ val|default:'' }}</font></td>
+            {% else %}
+            <td>{{ val|default:'' }}</td>
+            {% endif %}
+          {% endfor %}
+        </tr>
+      {% endfor %}
+    </table>
+  </div>
+</div>
+{% endblock %}
+<!-- " onclick="window.location='/explore/ship_name/{{ row.ship_name }}'" -->
